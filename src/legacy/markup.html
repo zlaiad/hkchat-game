@@ -1,0 +1,351 @@
+<div class="vignette"></div>
+<div id="app">
+
+  <!-- ============ 首页 ============ -->
+  <section id="home" class="screen on">
+    <div class="lamp"></div>
+    <h1 class="title serif">岁月之镜</h1>
+    <p class="subtitle">你玩的不是游戏，是父母的未来，也是你自己的明天。</p>
+    <p class="intro">接下来的十几分钟，你是 72 岁的陈奶奶。<br>眼睛蒙了纱，手不听使唤，耳朵漏掉半句话。<br>请完成她普通的一天。</p>
+    <div class="cards">
+      <div class="card" id="card-g11" onclick="openGame('g11')">
+        <span class="num">清晨</span><span class="icon">🛏</span>
+        <div><h3>起身，别晕倒</h3><p>平衡操控 · 眼前发黑的那几秒</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g1" onclick="openGame('g1')">
+        <span class="num">晨</span><span class="icon">💊</span>
+        <div><h3>看清说明书</h3><p>白内障视界 · 这药到底一次吃几片？</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g2" onclick="openGame('g2')">
+        <span class="num">晨</span><span class="icon">🤲</span>
+        <div><h3>拧开药瓶</h3><p>手抖模拟 · 按住瓶盖别松手</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g4" onclick="openGame('g4')">
+        <span class="num">上午</span><span class="icon">🚦</span>
+        <div><h3>二十秒绿灯</h3><p>行动迟缓 · 这条马路比你想的宽</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g7" onclick="openGame('g7')">
+        <span class="num">上午</span><span class="icon">🥬</span>
+        <div><h3>菜市场数钱</h3><p>模糊视界 · 报价没听全，纸币糊成片</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g8" onclick="openGame('g8')">
+        <span class="num">午</span><span class="icon">🧺</span>
+        <div><h3>我要买什么来着</h3><p>记忆负荷 · 游戏不会替你记住清单</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g3" onclick="openGame('g3')">
+        <span class="num">下午</span><span class="icon">👂</span>
+        <div><h3>听清孙子的话</h3><p>高频听损 · 重要的字总是漏掉</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g6" onclick="openGame('g6')">
+        <span class="num">下午</span><span class="icon">🏥</span>
+        <div><h3>自助挂号机</h3><p>反光屏幕 · 三十秒不动就退出重来</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g14" onclick="openGame('g14')">
+        <span class="num">下午</span><span class="icon">🪜</span>
+        <div><h3>爬回五楼的家</h3><p>双脚交替 · 没有电梯，心率是计时器</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g13" onclick="openGame('g13')">
+        <span class="num">傍晚</span><span class="icon">💃</span>
+        <div><h3>跟上广场舞</h3><p>节奏游戏 · 你的反应，慢了 0.35 秒</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g5" onclick="openGame('g5')">
+        <span class="num">傍晚</span><span class="icon">📱</span>
+        <div><h3>接住视频电话</h3><p>弹窗围城 · 铃声只响四十秒</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g12" onclick="openGame('g12')">
+        <span class="num">晚</span><span class="icon">🪡</span>
+        <div><h3>穿针引线</h3><p>精准拖拽 · 针眼那么小，手抖得那么大</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g10" onclick="openGame('g10')">
+        <span class="num">晚</span><span class="icon">💬</span>
+        <div><h3>回一条微信</h3><p>误触键盘 · 点的是A，出来的是B</p></div>
+        <span class="done">✓</span>
+      </div>
+      <div class="card" id="card-g9" onclick="openGame('g9')">
+        <span class="num">深夜</span><span class="icon">🌙</span>
+        <div><h3>摸黑去卫生间</h3><p>跌倒风险 · 绊到三次就会摔倒</p></div>
+        <span class="done">✓</span>
+      </div>
+    </div>
+    <p class="footnote">网页体验样本 · 十四个片段，就是她的一天</p>
+  </section>
+
+  <!-- ============ 关卡一：白内障 ============ -->
+  <section id="g1" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">晨 · 看清说明书</h2></div>
+    <div class="brief">清晨六点，光线昏暗。你拿起降压药，可说明书像蒙了一层毛玻璃。<b>按住下方"眯起眼睛"</b>能短暂看清，但很费力——注意你的体力。</div>
+    <div class="leaflet-frame" id="leafletFrame">
+      <div class="leaflet" id="leaflet">
+        <h4>复方降压片 · 说明书</h4>
+        【规 格】每片 5 毫克<br>
+        【适应症】用于原发性高血压的长期控制<br>
+        【用法用量】口服。<b>一日两次，每次一片</b>，饭后半小时以温水送服<br>
+        【注意事项】服药期间不可与葡萄柚同食；如漏服，切勿在下次加倍补服<br>
+        【贮 藏】密封，置阴凉干燥处避光保存
+      </div>
+      <div class="glare"></div>
+    </div>
+    <div class="stamina-wrap">
+      <div class="stamina-label"><span>眼部体力</span><span id="stam1Txt">100</span></div>
+      <div class="stamina" id="stam1Bar"><i id="stam1"></i></div>
+    </div>
+    <div class="center" style="margin:12px 0;">
+      <button class="btn" id="squintBtn">👁 按住 · 眯起眼睛</button>
+    </div>
+    <div class="quiz">
+      <h5>看清楚了吗？这药应该怎么吃：</h5>
+      <div class="opts" id="q1opts">
+        <button class="opt" data-r="0">一日一次，每次两片</button>
+        <button class="opt" data-r="1">一日两次，每次一片</button>
+        <button class="opt" data-r="0">一日两次，每次两片</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 关卡二：手抖 ============ -->
+  <section id="g2" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">午 · 拧开药瓶</h2></div>
+    <div class="brief">该吃药了。<b>用手指（或鼠标）按住瓶盖不放</b>，坚持拧满一圈。可你的手会不受控制地颤抖，而且越用力，抖得越厉害。</div>
+    <div id="tremorStage">
+      <div class="stage-hint" id="tremorHint">把手移到瓶盖上，按住别松开</div>
+      <div class="table-edge"></div>
+      <div id="bottle"></div>
+      <div id="cap"><div class="ring"></div><span>旋开</span></div>
+      <div id="hand">🤏</div>
+    </div>
+    <div class="stamina-wrap">
+      <div class="stamina-label"><span>拧开进度</span><span id="capTxt">0%</span></div>
+      <div class="stamina" ><i id="capBar" style="width:0%;background:linear-gradient(90deg,var(--amber-deep),var(--amber));"></i></div>
+    </div>
+  </section>
+
+  <!-- ============ 关卡三：重听 ============ -->
+  <section id="g3" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 听清孙子的话</h2></div>
+    <div class="brief">孙子打来电话。老年性耳聋最先偷走的是<b>高频的字音</b>——"四"和"十"，听起来一模一样。</div>
+    <button class="tinnitus-toggle" id="tinnitusBtn">🔔 戴上她的耳朵（模拟耳鸣声）</button>
+    <div class="talk">
+      <div class="avatar" id="npcFace">🧒</div>
+      <div class="bubble" id="speech"></div>
+    </div>
+    <div class="patience" id="patience">孙子的耐心：<b>😊😊😊</b></div>
+    <div class="center" style="margin-bottom:18px;">
+      <button class="btn ghost" id="repeatBtn">您说什么？再说一遍…</button>
+    </div>
+    <div class="quiz">
+      <h5>听明白了吗——星期几去医院复查？</h5>
+      <div class="opts" id="q3opts">
+        <button class="opt" data-r="0">星期三</button>
+        <button class="opt" data-r="1">星期四</button>
+        <button class="opt" data-r="0">星期五</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 关卡四：过马路 ============ -->
+  <section id="g4" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">傍晚 · 二十秒绿灯</h2></div>
+    <div class="brief">去菜市场要过这条八车道的马路。绿灯 20 秒，而你的腿只有年轻时四成的速度。<b>按住"迈步"前进</b>——如果红灯时你还在车道上……小心。路中间有安全岛。</div>
+    <div id="roadWrap">
+      <div id="road">
+        <div class="sidewalk top"></div>
+        <div class="sidewalk bottom"></div>
+        <div class="island">安 全 岛</div>
+        <div id="signal"><div class="light green" id="lightNum">20</div><small id="lightTxt">绿灯 · 可以通行</small></div>
+        <div id="walker">🧓</div>
+      </div>
+    </div>
+    <div class="stamina-wrap">
+      <div class="stamina-label"><span>腿脚力气</span><span id="legTxt">100</span></div>
+      <div class="stamina" id="legBarWrap"><i id="legBar"></i></div>
+    </div>
+    <div id="walkBtnWrap"><button class="btn" id="walkBtn">🚶 按住 · 迈步</button></div>
+  </section>
+
+  <!-- ============ 关卡：菜市场数钱 ============ -->
+  <section id="g7" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">上午 · 菜市场数钱</h2></div>
+    <div class="brief">买了一把青菜、一块豆腐。市场太吵，报价你没听全；钱包里的纸币也糊成一片。<b>按住"眯眼看钱"辨认面额</b>，点选纸币，凑出正好的钱数。</div>
+    <div class="talk">
+      <div class="avatar">🧑‍🌾</div>
+      <div class="bubble" id="vendorSay"></div>
+    </div>
+    <div class="center" style="margin-bottom:12px;">
+      <button class="btn ghost" id="askPriceBtn">多少钱？您再说一遍…</button>
+    </div>
+    <div class="wallet-frame"><div class="wallet" id="wallet"></div></div>
+    <div class="center" style="margin:14px 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn ghost" id="squint2Btn">👁 按住 · 眯眼看钱</button>
+      <button class="btn" id="payBtn">付钱（已拿 <span id="pickCnt">0</span> 张）</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：记忆购物 ============ -->
+  <section id="g8" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">午 · 我要买什么来着</h2></div>
+    <div class="brief">午饭后再出一趟门。出发前你默念了要买的三样东西——记牢了，<b>游戏不会替你记，路上还会有很多"热心"的干扰</b>。</div>
+    <div id="memoStage"></div>
+  </section>
+
+  <!-- ============ 关卡：自助挂号机 ============ -->
+  <section id="g6" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 自助挂号机</h2></div>
+    <div class="brief">医院大厅，人工窗口排着长队，护士指了指自助机。屏幕反光刺眼，<b>30 秒不操作就会自动退出重来</b>。任务：挂一个<b>心血管内科</b>的复查号。可以按住"用手挡光"看清屏幕。</div>
+    <div class="kiosk" id="kiosk">
+      <div class="kiosk-timer"><i id="kioskTimeBar"></i></div>
+      <div class="kiosk-screen" id="kioskScreen"></div>
+      <div class="glare2"></div>
+    </div>
+    <div class="center" style="margin-top:14px;">
+      <button class="btn ghost" id="shadeBtn">✋ 按住 · 用手挡住反光</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：手机弹窗 ============ -->
+  <section id="g5" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">傍晚 · 接住视频电话</h2></div>
+    <div class="brief">孙女打来视频电话！可不知道上次点错了什么，手机里长满了广告。<b>铃声只响 40 秒</b>——在挂断之前，关掉所有弹窗，按下绿色接听键。小心：有的"关闭"是假的。</div>
+    <div class="phone"><div class="phone-screen" id="phoneScreen"></div></div>
+    <div class="missTip">误触次数：<b id="missN">0</b> · 每一次误触，都是一次真实的挫败</div>
+  </section>
+
+  <!-- ============ 关卡：微信打字 ============ -->
+  <section id="g10" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">晚 · 回一条微信</h2></div>
+    <div class="brief">睡前给孙子回条微信，就五个字：<b>好的，周四见</b>。可键盘那么小，手指却不听话——你点的是这个键，屏幕上出来的，有时是旁边那个。</div>
+    <div class="chat" id="chatBox"></div>
+    <div class="compose" id="composeLine"><span class="ph">正在输入…</span></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="center" style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
+      <button class="btn ghost" id="delBtn">⌫ 删除</button>
+      <button class="btn" id="sendBtn">发送</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：摸黑起夜 ============ -->
+  <section id="g9" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">深夜 · 摸黑去卫生间</h2></div>
+    <div class="brief">凌晨两点，尿意把你叫醒。不想开大灯，你决定摸黑走到<b>右上角的卫生间</b>。用方向键挪动，当心脚下——<b>绊到三次就会摔倒</b>。听说左上角墙边有个夜灯开关……</div>
+    <div id="nightRoom">
+      <div class="night-hint">🛏 从床边出发 → 🚽 卫生间在右上角</div>
+      <div id="nightWalker">🧓</div>
+      <div id="nightMask"></div>
+    </div>
+    <div class="patience" style="text-align:center;margin-top:10px;">踉跄次数：<b id="stumbleN">0</b> / 3</div>
+    <div class="dpad">
+      <button class="dbtn" data-d="up">▲</button>
+      <div class="dpad-mid"><button class="dbtn" data-d="left">◀</button><button class="dbtn" data-d="right">▶</button></div>
+      <button class="dbtn" data-d="down">▼</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：起身平衡 ============ -->
+  <section id="g11" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">清晨 · 起身，别晕倒</h2></div>
+    <div class="brief">天蒙蒙亮，闹钟响了。老年人起床有个"魔鬼三十秒"——猛一起身，血压跟不上，眼前就会发黑。<b>按住 ◀ ▶ 对抗身体的摇晃</b>，让光球保持在中间的绿区，撑过三个阶段。晃出边缘就会眼前一黑。</div>
+    <div id="dizzyStage">
+      <div id="dizzyScene">
+        <div class="who" id="dizzyWho">🛌</div>
+        <div class="pname" id="dizzyPhase">第一步 · 慢慢坐起</div>
+      </div>
+      <div id="dizzyOverlay"></div>
+    </div>
+    <div class="balance-track">
+      <div class="balance-safe"></div>
+      <div id="balanceBall"></div>
+    </div>
+    <div class="phase-timer"><i id="phaseBar"></i></div>
+    <div class="hold-row">
+      <button class="holdbtn" id="balL">◀ 往左稳住</button>
+      <button class="holdbtn" id="balR">往右稳住 ▶</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：穿针引线 ============ -->
+  <section id="g12" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">晚 · 穿针引线</h2></div>
+    <div class="brief">外套掉了颗扣子。台灯下，你捏着线头往针眼里送。<b>按住线头，拖到针眼里，稳稳停住 1 秒</b>——可你的手在抖，捏着针的那只手，也在抖。</div>
+    <div id="needleStage">
+      <svg id="needleSvg"></svg>
+      <div id="needleEyeRing"></div>
+      <div id="needleTimer">用时 0 秒 · 脱手 0 次</div>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：广场舞节奏 ============ -->
+  <section id="g13" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">傍晚 · 跟上广场舞</h2></div>
+    <div class="brief">老姐妹们喊你跳一段。规则很简单：<b>光圈收拢到中心的瞬间拍下大按钮</b>。但有个残酷的设定——你的动作会比你的意识<b>慢 0.35 秒</b>才做出来。想踩上拍子？你得学会提前出手。16 拍里踩中 10 拍就算跟上了。</div>
+    <div id="danceStage">
+      <div class="dancers" id="dancers">💃 🕺 💃 🕺</div>
+      <div id="beatRing"><div id="beatPulse"></div><div id="beatWord">—</div></div>
+      <div id="handLag">👏</div>
+      <div id="danceFeed"></div>
+      <div class="dance-stats">踩中 <b id="hitN">0</b> / 16 拍</div>
+      <button class="btn" id="tapBeatBtn">🎵 开始跟跳</button>
+    </div>
+  </section>
+
+  <!-- ============ 关卡：爬五楼 ============ -->
+  <section id="g14" class="screen">
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 爬回五楼的家</h2></div>
+    <div class="brief">从医院回来，老楼没有电梯。<b>左右脚交替点击</b>往上爬——同一只脚连迈两次会趔趄退一步；爬快了心率飙升，超过红线就必须停下喘气；膝盖还会时不时突然一软。家在五楼。</div>
+    <div id="stairStage">
+      <div id="floorBig"><span id="floorN">1</span><small> / 5 楼</small></div>
+      <div class="stamina" style="margin:6px 0;"><i id="stepBar" style="width:0%;background:linear-gradient(90deg,var(--amber-deep),var(--amber));"></i></div>
+      <div id="stairMsg">深吸一口气，出发。</div>
+      <div class="heart-row">
+        <span class="hicon" id="heartIcon">🫀</span>
+        <div class="stamina" style="flex:1;"><i id="heartBar" style="width:20%;background:linear-gradient(90deg,var(--ok),var(--alert));"></i></div>
+        <span style="font-size:13px;color:var(--paper-dim);"><b id="heartN">70</b> 次/分</span>
+      </div>
+      <div class="foot-row">
+        <button class="footbtn" id="footL">🦶 左脚</button>
+        <button class="footbtn" id="footR">右脚 🦶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 结业 ============ -->
+  <section id="final" class="screen">
+    <div class="lamp" style="margin-top:10px;"></div>
+    <h1 class="title serif" style="font-size:32px;">这一天，结束了</h1>
+    <p class="intro">你只体验了十几分钟，<br>而他们的每一天，都是这样度过的。</p>
+    <h5 style="color:var(--amber);letter-spacing:.1em;margin-top:20px;">今天就能为家里老人做的事：</h5>
+    <div class="final-list">
+      <div>把父母手机的字体和音量调到最大，关掉广告弹窗多的 App</div>
+      <div>把家里常用药按星期分装进一周药盒</div>
+      <div>给楼梯、卫生间装上扶手和夜灯，收起地上的电线</div>
+      <div>陪他们去做一次视力和听力检查——白内障手术只需十分钟</div>
+      <div>教一遍视频通话，然后写在纸上，贴在电话旁</div>
+      <div>下次他们让你重复第三遍时，请用第一遍的语气</div>
+    </div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" onclick="restartAll()">再体验一次</button>
+    </div>
+    <p class="footnote">《岁月之镜》体验样本 · 愿每一次等待都被温柔以待</p>
+  </section>
+</div>
+
+<!-- ============ 结果弹层 ============ -->
+<div id="modal">
+  <div class="modal-box">
+    <h3 id="mTitle"></h3>
+    <div id="mBody"></div>
+    <div class="voice" id="mVoice"></div>
+    <div class="datacard" id="mData"></div>
+    <div class="modal-actions" id="mActions"></div>
+  </div>
+</div>

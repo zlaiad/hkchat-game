@@ -1,11 +1,22 @@
-# hkchat-game
+# hkchat-game (React + i18next)
 
-Local mirror of the `岁月之镜` demo.
+Mirror of the `岁月之镜` demo migrated into a React app with i18next-based language switching.
 
-## Run locally
+## Start locally
 
 ```bash
-python3 -m http.server 8080
+npm install
+npm run dev
 ```
 
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
+Then open the local Vite URL shown in terminal (usually `http://localhost:5173`).
+
+## Language switching
+
+- Use the top-right language selector in the UI
+- Or use URL query params:
+  - `?lang=zh-Hans`
+  - `?lang=zh-Hant`
+  - `?lang=en`
+
+Selected language is persisted in `localStorage` as `mirror_lang`.
