@@ -332,6 +332,21 @@ const g4=(function(){
 
   const H=430, TOP_SAFE=56, BOT_SAFE=H-56;   // 人行道
   const ISL_TOP=194, ISL_BOT=236;            // 安全岛
+  const TRAFFIC_TYPES={
+    minibus:{label:'小巴',className:'minibus',speed:[245,315]},
+    "double-decker":{label:'巴士',className:'double-decker',speed:[115,155]},
+    taxi:{label:'🚕',className:'taxi',speed:[180,230]},
+    car:{label:'🚗',className:'private-car',speed:[145,190]}
+  };
+  const TRAFFIC_LANES=[
+    {ly:86,type:'minibus'},
+    {ly:120,type:'taxi'},
+    {ly:154,type:'double-decker'},
+    {ly:264,type:'double-decker'},
+    {ly:298,type:'minibus'},
+    {ly:332,type:'car'},
+    {ly:366,type:'taxi'}
+  ];
   let y=H-28, walking=false, leg=100;
   let green=true, tLight=20, raf=null, last=0, done=false, attempts=0;
   let cars=[],carEls=[];
@@ -350,16 +365,22 @@ const g4=(function(){
         road.appendChild(m);
       }
     });
-    // 车辆：上半区向左，下半区向右
-    const carLanes=[86,120,154,264,298,332,366];
-    carLanes.forEach((ly,i)=>{
+    // 车辆：小巴较快、巴士较慢且更占视野，只制造压迫感，不改变失败规则。
+    TRAFFIC_LANES.forEach(({ly,type},i)=>{
+      const traffic=TRAFFIC_TYPES[type];
+      const dir=(ly<ISL_TOP)?-1:1;
       const el=document.createElement('div');
-      el.className='car';
-      el.textContent=(ly<ISL_TOP)?'🚙':'🚗';
+      el.className='car '+traffic.className;
+      el.textContent=traffic.label;
       el.style.top=(ly-6)+'px';
       road.appendChild(el);
       carEls.push(el);
-      cars.push({x:Math.random()*360,ly,dir:(ly<ISL_TOP)?-1:1,speed:150+Math.random()*90,off:i*60});
+      cars.push({
+        x:(i*92)%440-80,
+        dir,
+        flip:dir>0&&(type==='taxi'||type==='car'),
+        speed:traffic.speed[0]+Math.random()*(traffic.speed[1]-traffic.speed[0])
+      });
     });
   }
   function inSafeZone(yy){
@@ -393,9 +414,9 @@ const g4=(function(){
     cars.forEach((c,i)=>{
       if(!green){
         c.x+=c.dir*c.speed*dt;
-        if(c.x>420)c.x=-60; if(c.x<-60)c.x=420;
+        if(c.x>460)c.x=-130; if(c.x<-130)c.x=460;
       }
-      carEls[i].style.transform='translateX('+c.x+'px)';
+      carEls[i].style.transform='translateX('+c.x+'px)'+(c.flip?' scaleX(-1)':'');
     });
 
     // 判定
@@ -449,19 +470,23 @@ const g4=(function(){
 
 /* ================= 关卡：菜市场数钱 ================= */
 const g7=(function(){
+  const TARGET_PRICE=86;
   const priceStages=[
-    '青菜三块八，豆腐两块七，一共<span class="miss">◌</span>块<span class="miss">◌</span>毛！',
-    '一共六块<span class="miss">◌</span>，大姐！',
-    '（他凑到你耳边喊）一共——六块五！'
+    '一條魚六十八，菜心十八，總共<span class="miss">◌</span>十<span class="miss">◌</span>蚊！',
+    '總共八十<span class="miss">◌</span>蚊，阿姐！',
+    '（他湊到你耳邊喊）總共——八十六蚊！'
   ];
   const BILLS=[
-    {v:10, c:'#3E6FA8', t:'拾 元'},
-    {v:5,  c:'#7B5AA6', t:'伍 元'},
-    {v:1,  c:'#5E8F62', t:'壹 元'},
-    {v:1,  c:'#5E8F62', t:'壹 元'},
-    {v:0.5,c:'#A8825E', t:'伍 角'},
-    {v:0.5,c:'#A8825E', t:'伍 角'},
-    {v:0.1,c:'#8B8F98', t:'壹 角'}
+    {v:100,c:'#8B4A6B', t:'壹佰蚊'},
+    {v:50, c:'#6B9A6B', t:'伍拾蚊'},
+    {v:50, c:'#6B9A6B', t:'伍拾蚊'},
+    {v:20, c:'#6F8EC7', t:'貳拾蚊'},
+    {v:10, c:'#8A68A8', t:'拾蚊'},
+    {v:5,  c:'#B78352', t:'五蚊'},
+    {v:5,  c:'#B78352', t:'五蚊'},
+    {v:2,  c:'#9AA0A8', t:'兩蚊'},
+    {v:2,  c:'#9AA0A8', t:'兩蚊'},
+    {v:2,  c:'#9AA0A8', t:'兩蚊'}
   ];
   let stage=0,done=false;
   const vendor=document.getElementById('vendorSay');
@@ -480,7 +505,7 @@ const g7=(function(){
     wallet.innerHTML='';
     BILLS.forEach(b=>{
       const el=document.createElement('button');
-      el.className='bill';
+      el.className='bill'+(b.v<10?' coin':'');
       el.style.background='linear-gradient(100deg,'+b.c+' 20%, #fff2 50%, '+b.c+' 80%),'+b.c;
       el.textContent=b.t;
       el.dataset.v=b.v;
@@ -498,25 +523,25 @@ const g7=(function(){
     if(!sels.length)return;
     const sum=Math.round(sels.reduce((s,el)=>s+parseFloat(el.dataset.v),0)*10)/10;
     done=true;
-    const askNote= stage===0 ? '而且你没让摊主重复，就赌对了价格——现实里，老人往往直接递上一张大钞：“你看着找吧。”'
-                             : '你让摊主重复了 '+stage+' 遍。菜市场里，不是每个摊主都有这份耐心。';
-    if(sum===6.5){
+    const askNote= stage===0 ? '而且你没让鱼档老板重复，就赌对了价格——现实里，老人往往直接递上一张大钞：“你看着找吧。”'
+                             : '你让鱼档老板重复了 '+stage+' 遍。街市里，不是每个档口都有这份耐心。';
+    if(sum===TARGET_PRICE){
       showResult({gameId:'g7',success:true,
-        title:'不多不少，正好六块五',
-        body:'在模糊的视界里数对了钱。'+askNote,
-        voice:'“一块的是绿的，五毛的是……哪张来着？唉，眯眼看看再给。”',
-        data:'<b>真实数据</b> · 白内障带来的“黄化”让颜色难以分辨，纸币面额首当其冲。当越来越多摊位只挂出收款码，一位只会用现金的老人，连买菜都成了闯关。'});
-    }else if(sum>6.5){
+        title:'不多不少，正好八十六蚊',
+        body:'在模糊的视界里数对了港纸。'+askNote,
+        voice:'“五十蚊係綠色，二十蚊係藍色……等我瞇埋眼睇清楚先。”',
+        data:'<b>真实数据</b> · 白内障带来的“黄化”让颜色难以分辨，纸币面额首当其冲。当越来越多街市档口只挂出收款码，一位只会用现金的老人，连买一条鱼和一扎菜都成了闯关。'});
+    }else if(sum>TARGET_PRICE){
       showResult({gameId:'g7',success:true,
-        title:'摊主笑了：“大姐，多啦多啦”',
-        body:'你多付了 '+((sum-6.5).toFixed(1))+' 元，好在遇上了厚道人，找了回来。可要是遇上不厚道的呢？很多老人多付了钱，自己永远不会知道。',
-        voice:'“给多点总没错，省得算……让人家找吧。”',
+        title:'鱼档老板笑了：“阿姐，多咗喇”',
+        body:'你多付了 '+(sum-TARGET_PRICE)+' 蚊，好在遇上了厚道人，找了回来。可要是遇上不厚道的呢？很多老人多付了钱，自己永远不会知道。',
+        voice:'“畀多張大鈔算啦，費事數錯……等人哋找返。”',
         data:'<b>真实数据</b> · 视力与计算速度下降后，“多给钱让对方找”是老人普遍的自我保护策略——也让他们成了找零欺诈的最易受害人群。'});
     }else{
       showResult({gameId:'g7',success:false,
-        title:'“大姐，钱不够呢”',
-        body:'差了 '+((6.5-sum).toFixed(1))+' 元。摊主提高了嗓门，后面排队的人朝你看过来，你的脸一下子热了。',
-        voice:'“人老了，连钱都数不清了……丢人哟。”',
+        title:'“阿姐，唔夠錢喎”',
+        body:'差了 '+(TARGET_PRICE-sum)+' 蚊。档主提高了嗓门，后面排队的人朝你看过来，你的脸一下子热了。',
+        voice:'“人老咗，連買餸啲錢都數唔清……真係失禮。”',
         data:'<b>真实数据</b> · 这种当众的窘迫会让老人逐渐回避独自购物、回避社交——很多“不爱出门”，其实是“怕出错”。'});
     }
   });
@@ -535,12 +560,12 @@ const g7=(function(){
 /* ================= 关卡：记忆购物 ================= */
 const g8=(function(){
   const stageEl=document.getElementById('memoStage');
-  const TARGET=['降压药','生抽酱油','原味酸奶'];
-  const OPTIONS=['降压药','感冒药','生抽酱油','老抽酱油','原味酸奶','草莓酸奶','鸡蛋','挂面','白糖'];
+  const TARGET=['必理痛','薯片','生抽酱油'];
+  const OPTIONS=['必理痛','幸福傷風素','胃藥','薯片','蝦條','生抽酱油','老抽酱油','蠔油','紙巾'];
   const WALKS=[
-    '楼下碰到王阿姨：“哎哟出门啊？跟你说，我孙子这次月考考了 98 分！”你陪着笑，聊了好一会儿。',
-    '路过小广场，音响放着《最炫民族风》，跳舞的老姐妹朝你直招手：“明天你可得来啊！”',
-    '超市门口的大喇叭循环喊着：“鸡蛋特价！三块九一斤！三块九一斤！最后一天！”'
+    '升降機大堂碰到隔籬陳太：“落街呀？我個孫今朝又唔肯返學呀……”你陪著笑，聽咗好一陣。',
+    '過馬路嗰陣，小巴、巴士同八達通嘟嘟聲一齊湧過嚟，你心入面張清單突然散咗一半。',
+    '超市門口喇叭循環播著：“薯片第二包半價！蝦條特價！今日最後一天！”'
   ];
   let timer=null,picked=[];
 
@@ -548,8 +573,8 @@ const g8=(function(){
     picked=[];clearInterval(timer);
     let n=6;
     stageEl.innerHTML=
-      '<div class="memo-card">出门要买三样东西：<br><b>降压药 · 生抽酱油 · 原味酸奶</b></div>'+
-      '<div class="memo-count">在心里默念一遍……<span id="memoN">6</span> 秒后出发</div>';
+      '<div class="memo-card">落街要買三樣嘢：<br><b>必理痛 · 薯片 · 生抽酱油</b></div>'+
+      '<div class="memo-count">喺心入面默念一次……<span id="memoN">6</span> 秒後出發</div>';
     timer=setInterval(()=>{
       n--;
       const el=document.getElementById('memoN');
@@ -559,16 +584,16 @@ const g8=(function(){
   }
   function walkStep(i){
     if(i>=WALKS.length){arrive();return;}
-    stageEl.innerHTML='<div class="walk-event">🚶 '+WALKS[i]+'</div><div class="center"><button class="btn" id="goOn">继续往前走</button></div>';
+    stageEl.innerHTML='<div class="walk-event">🚶 '+WALKS[i]+'</div><div class="center"><button class="btn" id="goOn">繼續行</button></div>';
     document.getElementById('goOn').onclick=()=>walkStep(i+1);
   }
   function arrive(){
     stageEl.innerHTML='<div class="memo-card" style="background:var(--dusk2);color:var(--paper-dim);">……</div>';
     setTimeout(()=>{
       stageEl.innerHTML=
-        '<div class="walk-event">到超市了。你站在货架前，手扶着购物篮，忽然愣住——<b style="color:var(--amber)">我刚才……要买什么来着？</b><br>凭记忆选出那三样：</div>'+
+        '<div class="walk-event">到超市了。你企喺貨架前，手扶住購物籃，突然愣住——<b style="color:var(--amber)">頭先……要買咩嚟？</b><br>靠記憶揀返嗰三樣：</div>'+
         '<div class="shop-grid" id="shopGrid"></div>'+
-        '<div class="center"><button class="btn" id="checkout">去结账（<span id="pkn">0</span>/3）</button></div>';
+        '<div class="center"><button class="btn" id="checkout">去畀錢（<span id="pkn">0</span>/3）</button></div>';
       const grid=document.getElementById('shopGrid');
       OPTIONS.forEach(o=>{
         const b=document.createElement('button');
@@ -590,20 +615,20 @@ const g8=(function(){
         const wrong=picked.filter(x=>!TARGET.includes(x));
         if(hits.length===3){
           showResult({gameId:'g8',success:true,
-            title:'三样都记住了',
-            body:'穿过了王阿姨的孙子、广场舞和特价鸡蛋，你把清单护送到了收银台。注意到了吗——这一路上，<b>没有任何任务提示帮你</b>。',
-            voice:'“出门前念三遍，一路上再念三遍。人家笑我嘴里嘀咕，不嘀咕就忘啦。”',
+            title:'三樣都記住咗',
+            body:'穿過鄰居閒談、小巴聲同超市特價廣播，你將張清單護送到收銀處。留意到嗎——呢一路上，<b>冇任何任務提示幫你</b>。',
+            voice:'“出門前念三次，一路上再念三次。人哋笑我口噏噏，唔噏就真係會唔記得。”',
             data:'<b>真实数据</b> · 工作记忆容量随年龄自然衰退，且更容易被无关信息“覆写”。列清单、口头复述、把东西放在门口——这些不是怪癖，是老人为自己发明的记忆假肢。'});
         }else{
-          let bodyTxt='回到家打开袋子，你才发现：';
+          let bodyTxt='返到屋企打開袋，你先發現：';
           if(missed.length)bodyTxt+='<b>忘了买 '+missed.join('、')+'</b>；';
-          if(wrong.length)bodyTxt+='多买了 '+wrong.join('、')+'。';
-          if(picked.includes('鸡蛋'))bodyTxt+='<br>那斤特价鸡蛋——喇叭喊进脑子里的东西，比你自己要买的记得还牢。';
-          if(missed.includes('降压药'))bodyTxt+='<br>而忘掉的偏偏是降压药。';
+          if(wrong.length)bodyTxt+='買多咗 '+wrong.join('、')+'。';
+          if(picked.includes('蝦條'))bodyTxt+='<br>嗰包特價蝦條——喇叭塞入腦入面嘅嘢，竟然記得清過自己張清單。';
+          if(missed.includes('必理痛'))bodyTxt+='<br>而忘掉的偏偏是必理痛。';
           showResult({gameId:'g8',success:false,
-            title:'袋子里的东西，不太对',
+            title:'袋入面啲嘢，唔係好啱',
             body:bodyTxt,
-            voice:'“明明出门前还记得清清楚楚的……怎么一路走一路就漏了呢。”',
+            voice:'“明明出門前仲記得清清楚楚……點解一路行一路就漏咗呢。”',
             data:'<b>真实数据</b> · 偶尔忘事是正常老化；但如果“忘了买”变成“忘了自己来过超市”，就需要警惕认知障碍的早期信号。区分两者，是家人能做的第一层守护。'});
         }
       };
