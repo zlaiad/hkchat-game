@@ -779,6 +779,40 @@ b {
   filter: drop-shadow(3px 3px 0 var(--line));
 }
 
+.car.minibus,
+.car.double-decker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 2px 8px;
+  color: #fff;
+  background: var(--hk-red);
+  border: 3px solid var(--line);
+  box-shadow: 3px 3px 0 var(--shadow);
+  filter: none;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.car.minibus {
+  min-width: 58px;
+}
+
+.car.double-decker {
+  min-width: 86px;
+  height: 34px;
+  color: var(--mtr);
+  background: var(--taxi);
+  font-size: 14px;
+}
+
+.car.taxi,
+.car.private-car {
+  filter: drop-shadow(3px 3px 0 var(--line));
+}
+
 #walker {
   position: absolute;
   z-index: 6;
@@ -891,6 +925,17 @@ b {
   filter: blur(3px) saturate(0.65) brightness(0.9);
   outline: 3px solid transparent;
   transition: filter 0.25s steps(3, end);
+}
+
+.bill.coin {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  font-size: 13px;
+  box-shadow:
+    inset 0 2px 7px rgba(255, 255, 255, 0.28),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.28),
+    3px 3px 0 var(--shadow);
 }
 
 .wallet.squint .bill {
