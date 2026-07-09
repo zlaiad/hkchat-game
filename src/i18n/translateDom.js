@@ -24,7 +24,12 @@ export function applyDomTranslation(root, lang) {
     const parent = node.parentElement;
     if (parent && !shouldSkip(parent)) {
       if (node.__origText === undefined) node.__origText = node.nodeValue;
-      node.nodeValue = translateText(node.__origText, lang);
+      if (node.__translatedText !== undefined && node.nodeValue !== node.__translatedText) {
+        node.__origText = node.nodeValue;
+      }
+      const translated = translateText(node.__origText, lang);
+      node.__translatedText = translated;
+      if (node.nodeValue !== translated) node.nodeValue = translated;
     }
     node = walker.nextNode();
   }
@@ -39,4 +44,3 @@ export function applyDomTranslation(root, lang) {
     });
   });
 }
-

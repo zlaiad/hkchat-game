@@ -637,91 +637,148 @@ const g8=(function(){
   return {start, stop(){clearInterval(timer);}};
 })();
 
-/* ================= 关卡：自助挂号机 ================= */
+/* ================= 关卡：八达通余额不足 ================= */
 const g6=(function(){
   const TOTAL=30;
-  const kiosk=document.getElementById('kiosk');
-  const scr=document.getElementById('kioskScreen');
-  const bar=document.getElementById('kioskTimeBar');
-  let t=TOTAL,step=0,raf=null,last=0,done=false,busy=false,timeouts=0;
+  const stage=document.getElementById('octopusStage');
+  const scene=document.getElementById('octopusScene');
+  const controls=document.getElementById('octopusControls');
+  const msg=document.getElementById('octopusMsg');
+  const pressureBar=document.getElementById('octPressureBar');
+  const pressureN=document.getElementById('octPressureN');
+  const timeN=document.getElementById('octTimeN');
+  const shadeBtn=document.getElementById('octShadeBtn');
+  let t=TOTAL,phase='gate',pressure=0,maxPressure=0,errors=0,timeouts=0,amount=50,done=false,raf=null,last=0,t0=0;
 
-  bindHold(document.getElementById('shadeBtn'),
-    ()=>kiosk.classList.add('shaded'),
-    ()=>kiosk.classList.remove('shaded'));
+  bindHold(shadeBtn,()=>stage.classList.add('clear'),()=>stage.classList.remove('clear'));
 
-  function touch(){/* 每次有效操作重置读秒 */ t=TOTAL;}
+  function touch(){t=TOTAL;}
+  function addPressure(n,text){
+    pressure=Math.min(100,pressure+n);
+    maxPressure=Math.max(maxPressure,pressure);
+    if(text)msg.textContent=text;
+    if(n>0){
+      stage.classList.add('shake');
+      setTimeout(()=>stage.classList.remove('shake'),320);
+    }
+    if(pressure>=100&&errors>=3)fail();
+  }
+  function renderStatus(){
+    pressureBar.style.width=pressure+'%';
+    pressureN.textContent=Math.round(pressure);
+    timeN.textContent=Math.ceil(t);
+    stage.classList.toggle('panic',pressure>=65);
+  }
+  function setControls(html){controls.innerHTML=html;}
   function render(){
-    busy=false;
-    if(step===0){
-      scr.innerHTML='<h4>自助挂号 · 欢迎使用</h4><p>请将社会保障卡插入卡槽（芯片朝上）</p><div class="kgrid"><button class="kbtn" data-a="card">💳 插入医保卡</button><button class="kbtn" data-a="none">📱 电子凭证（维护中）</button></div><p class="khint">如需帮助请联系大厅工作人员</p>';
-    }else if(step===1){
-      scr.innerHTML='<h4>请选择科室</h4><div class="kgrid"><button class="kbtn" data-a="no">普通内科</button><button class="kbtn" data-a="no">骨科</button><button class="kbtn" data-a="ok">心血管内科</button><button class="kbtn" data-a="no">眼科</button><button class="kbtn" data-a="no">皮肤科</button><button class="kbtn" data-a="no">外科</button></div><p class="khint" id="kmsg"></p>';
-    }else if(step===2){
-      scr.innerHTML='<h4>心血管内科 · 请选择医生</h4><div class="kgrid"><button class="kbtn" disabled>刘医生（号满）</button><button class="kbtn" data-a="ok">陈医生（余 3）</button><button class="kbtn" disabled>周医生（号满）</button><button class="kbtn" data-a="no">返回上级</button></div>';
-    }else if(step===3){
-      scr.innerHTML='<h4>陈医生 · 请选择时段</h4><div class="kgrid"><button class="kbtn" disabled>上午（已过时段）</button><button class="kbtn" data-a="ok">下午 14:30</button><button class="kbtn" data-a="ok">下午 16:00</button><button class="kbtn" data-a="no">返回上级</button></div>';
-    }else if(step===4){
-      scr.innerHTML='<h4>确认挂号信息</h4><p>心血管内科 · 陈医生 · 今日下午<br>诊查费：10.00 元</p><p style="color:#C0632F;">💡 推荐开通电子医保凭证，扫码关注公众号即可注册！</p><div class="kgrid"><button class="kbtn" data-a="scan">扫码关注并注册</button><button class="kbtn" data-a="ok">直接用实体卡缴费</button></div>';
+    renderStatus();
+    if(phase==='gate'){
+      scene.innerHTML='<div class="oct-gate"><b>入闸机</b><div class="oct-reader red">请拍卡</div><div class="oct-card">八达通</div></div><div class="oct-crowd">🧍 🧍 🧍</div>';
+      setControls('<button class="kbtn" data-a="tapGate">💳 拍八达通</button>');
+      msg.textContent='先拍八达通入闸。';
+    }else if(phase==='machines'){
+      scene.innerHTML='<div class="oct-machines"><button class="oct-machine" data-machine="ticket">售票机</button><button class="oct-machine" data-machine="check">查阅机</button><button class="oct-machine good" data-machine="topup">增值机</button><button class="oct-machine" data-machine="service">客服中心</button></div>';
+      setControls('');
+      msg.textContent='后面有人排队。离开闸机，找增值机。';
+    }else if(phase==='card'){
+      scene.innerHTML='<div class="oct-kiosk"><h4>增值机</h4><p>步骤 1 / 4：请拍卡</p><div class="oct-reader">读卡区</div><div class="bill-slot">入钞口</div></div>';
+      setControls('<button class="kbtn" data-a="tapMachineCard">💳 拍到读卡区</button><button class="kbtn" data-a="tapWrongSlot">拍到入钞口</button>');
+      msg.textContent='把八达通拍到黄色读卡区。';
+    }else if(phase==='amount'){
+      scene.innerHTML='<div class="oct-kiosk"><h4>选择增值金额</h4><p>余额 HK$3.7</p><div class="amount-row"><button data-a="amount" data-v="20">HK$20</button><button data-a="amount" data-v="50">HK$50</button><button data-a="amount" data-v="100">HK$100</button></div></div>';
+      setControls('');
+      msg.textContent='目标是增值 HK$50。反光下，20 和 50 很容易看错。';
+    }else if(phase==='cash'){
+      scene.innerHTML='<div class="oct-kiosk"><h4>请放入纸币</h4><p>已选择 HK$'+amount+'</p><div class="cash-row"><button data-a="cash" data-v="10">HK$10</button><button data-a="cash" data-v="20">HK$20</button><button data-a="cash" data-v="50">HK$50</button><button data-a="cash" data-v="100">HK$100</button></div></div>';
+      setControls('');
+      msg.textContent='从钱包里找出同面额纸币。按住眯眼可以短暂看清。';
+    }else if(phase==='return'){
+      scene.innerHTML='<div class="oct-gate ok"><b>入闸机</b><div class="oct-reader">请再次拍卡</div><div class="oct-card">八达通</div></div><div class="oct-crowd kind">🧍 <span>慢慢嚟，我唔赶。</span></div>';
+      setControls('<button class="kbtn" data-a="passGate">💳 再次拍卡</button>');
+      msg.textContent='增值成功。回到闸机，再拍一次卡。';
     }
   }
-  scr.addEventListener('click',e=>{
-    const b=e.target.closest('.kbtn');
-    if(!b||done||busy)return;
-    const a=b.dataset.a;
-    touch();
-    if(a==='card'&&step===0){step=1;render();}
-    else if(a==='ok'){
-      if(step===4){finish();}
-      else{step++;render();}
-    }
-    else if(a==='no'){
-      const m=document.getElementById('kmsg');
-      if(m)m.textContent='该科室今日无复查号，请重新选择。';
-      if(step>1){step=1;render();}
-    }
-    else if(a==='none'){
-      scr.querySelector('.khint').textContent='电子凭证功能维护中，请使用实体卡。';
-    }
-    else if(a==='scan'){
-      busy=true;
-      scr.innerHTML='<h4>正在跳转…</h4><p>请使用手机扫描屏幕二维码<br>▨▨▨<br>等待关注确认…</p>';
-      setTimeout(()=>{
-        scr.innerHTML='<h4>⚠ 注册失败</h4><p>验证码已超时，请返回重试。</p>';
-        setTimeout(()=>{step=4;render();},1600);
-      },3200);
-    }
-  });
+  function wrong(text,n=10){
+    errors++;touch();addPressure(n,text);
+  }
   function finish(){
-    done=true;
-    scr.innerHTML='<h4>✅ 挂号成功</h4><p>请取走凭条，前往三楼候诊。</p>';
+    done=true;renderStatus();
+    scene.innerHTML='<div class="oct-gate ok"><b>嘟——通过</b><div class="oct-reader">绿色灯</div></div>';
+    const sec=Math.round((performance.now()-t0)/1000);
     setTimeout(()=>{
       showResult({gameId:'g6',success:true,
-        title:'挂上号了',
-        body: timeouts===0
-          ? '你在 30 秒的倒计时里一次通关。可你有没有想过——刚才每一步，你都在赶时间，而机器后面还排着队。'
-          : '机器把你踢出来了 '+timeouts+' 次，每次都要从插卡重新开始。队伍里的叹气声，你听见了吗？',
-        voice:'“闺女，这机器……能不能别催我啊。”',
-        data:'<b>真实数据</b> · 多数自助终端的无操作超时设定在 30–60 秒，是按年轻人的阅读与决策速度设计的。适老化改造清单里，“延长超时、放大字体、保留人工窗口”排在最前面。'});
-    },1200);
+        title:'终于入到闸，'+sec+' 秒',
+        body:'你不是不会用八达通。你只是被闸机声、后面人流、反光屏幕、倒计时和细字一起夹住。'+(amount===20?'<br>你只增值了 HK$20，今日行程可能仍然要小心余额。':''),
+        voice:'“嘟嘟一响，后面有人等，我个脑就乱晒。”',
+        data:'<b>数码通行指数</b> · 误触 '+errors+' 次，超时 '+timeouts+' 次，最高压力 '+Math.round(maxPressure)+'%。公共空间的数码流程，最难的往往是出错之后没有人等你。'});
+    },900);
+  }
+  function fail(){
+    if(done)return;
+    done=true;renderStatus();
+    setTimeout(()=>{
+      showResult({gameId:'g6',success:false,
+        title:'你决定先离开闸机',
+        body:'你站在增值机前，突然不想再试了。后面的人没有骂你，只是叹了一口气。但这一声已经够了。你决定走去客服中心排队，或者改天再去覆诊。',
+        voice:'“我不是不会，我只是越急越看不清。”',
+        data:'<b>体验提示</b> · 压力会放大视力和操作困难。清晰按钮、足够时间、有人帮忙解释，能让长者保住体面。'});
+    },500);
+  }
+  controls.addEventListener('click',e=>{
+    const b=e.target.closest('[data-a]');
+    if(!b||done)return;
+    handle(b.dataset.a,b.dataset.v);
+  });
+  scene.addEventListener('click',e=>{
+    const machine=e.target.closest('[data-machine]');
+    const b=e.target.closest('[data-a]');
+    if(done)return;
+    if(machine){handle('machine',machine.dataset.machine);}
+    else if(b){handle(b.dataset.a,b.dataset.v);}
+  });
+  function handle(a,v){
+    touch();
+    if(a==='tapGate'&&phase==='gate'){
+      phase='machines';pressure=35;maxPressure=35;render();
+      msg.textContent='嘟嘟——余额不足。后面有人排队。';
+    }else if(a==='machine'&&phase==='machines'){
+      if(v==='topup'){phase='card';render();}
+      else if(v==='service'){wrong('客服中心前排了很长的队。压力又上来了。',15);}
+      else wrong('这部不是增值机。字太细，刚才看错了。',10);
+    }else if(a==='tapMachineCard'&&phase==='card'){
+      phase='amount';render();
+    }else if(a==='tapWrongSlot'&&phase==='card'){
+      wrong('机器没有反应。你才发现那是入钞口。',10);
+    }else if(a==='amount'&&phase==='amount'){
+      amount=Number(v);
+      if(amount===100){wrong('现钞不够 HK$100。请重新选择。',15);}
+      else{phase='cash';render();if(amount===20)addPressure(6,'HK$20 也可以，但今天可能不够用。');}
+    }else if(a==='cash'&&phase==='cash'){
+      const cash=Number(v);
+      if(cash===amount){phase='return';pressure=Math.max(0,pressure-12);render();}
+      else wrong('纸币不符，请取回。后面提示音又响了一次。',10);
+    }else if(a==='passGate'&&phase==='return'){
+      finish();
+    }
   }
   function loop(ts){
     if(!last)last=ts;
     const dt=Math.min((ts-last)/1000,.1);last=ts;
-    if(!done){
+    if(!done&&phase!=='gate'&&phase!=='return'){
       t-=dt;
-      bar.style.width=Math.max(0,t/TOTAL*100)+'%';
       if(t<=0){
-        timeouts++;t=TOTAL;step=0;busy=false;
-        scr.innerHTML='<h4>⏱ 长时间未操作</h4><p>系统已自动退出，请重新开始。</p>';
-        setTimeout(()=>{if(!done)render();},1400);
+        timeouts++;t=TOTAL;phase='card';errors++;addPressure(20,'长时间未操作，系统回到首页。又要重新拍卡。');
+        if(timeouts>=3)fail();
+        else render();
       }
     }
+    renderStatus();
     raf=requestAnimationFrame(loop);
   }
   return {
     start(){
-      t=TOTAL;step=0;done=false;busy=false;timeouts=0;last=0;
-      kiosk.classList.remove('shaded');
+      t=TOTAL;phase='gate';pressure=0;maxPressure=0;errors=0;timeouts=0;amount=50;done=false;last=0;t0=performance.now();
+      stage.classList.remove('clear','panic');
       render();
       cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
     },
@@ -1217,210 +1274,346 @@ const g12=(function(){
   };
 })();
 
-/* ================= 关卡：广场舞节奏（反应延迟音游） ================= */
+/* ================= 关卡：叮叮车落车（听站+按钟+到门口） ================= */
 const g13=(function(){
-  const BEAT=60/90;          // 90 BPM
-  const LAG=0.35;            // 神经反应延迟
-  const WIN=0.2;             // 判定窗口 ±0.2s
-  const COUNT_IN=4, TOTAL=16;
-  const dancers=document.getElementById('dancers');
-  const pulse=document.getElementById('beatPulse');
-  const word=document.getElementById('beatWord');
-  const feed=document.getElementById('danceFeed');
-  const hand=document.getElementById('handLag');
-  const hitEl=document.getElementById('hitN');
-  const btn=document.getElementById('tapBeatBtn');
-  let ac=null,startT=0,raf=null,done=false,running=false;
-  let judged=[],pending=[],hits=0,lastBeatShown=-1;
+  const STOPS=[
+    {name:'金钟道',heard:'下一站：金___'},
+    {name:'修顿球场',heard:'下一站：修___球场'},
+    {name:'湾仔街市',heard:'下一站：湾___市',target:true},
+    {name:'天乐里',heard:'下一站：天___里'}
+  ];
+  const STOP_DISTANCE=160;
+  const LISTEN_SPEED=16;
+  const WALK_SPEED=8;
+  const board=document.getElementById('stationBoard');
+  const flash=document.getElementById('bellFlash');
+  const progressEl=document.getElementById('tramProgress');
+  const balanceBar=document.getElementById('tramBalanceBar');
+  const feed=document.getElementById('tramFeed');
+  const choices=document.getElementById('tramChoices');
+  const bellBtn=document.getElementById('bellBtn');
+  const replayBtn=document.getElementById('tramReplayBtn');
+  const holdBtn=document.getElementById('tramHoldBtn');
+  const moveBtn=document.getElementById('tramMoveBtn');
+  const grandma=document.getElementById('tramGrandma');
+  let stopIndex=0,distance=STOP_DISTANCE,position=0,balance=100,prepared=false,identified=false,holding=false,blocked=0,done=false,raf=null,last=0,ac=null,lastMsg='';
 
-  btn.addEventListener('click',()=>{
-    if(!running){begin();return;}
-    if(done)return;
-    // 意识按下了，身体 0.35 秒后才动
-    pending.push(ac.currentTime+LAG);
-    setTimeout(()=>{
-      hand.style.opacity='1';
-      setTimeout(()=>hand.style.opacity='0',140);
-    },LAG*1000);
+  bellBtn.addEventListener('click',ring);
+  replayBtn.addEventListener('click',replay);
+  moveBtn.addEventListener('click',move);
+  holdBtn.addEventListener('click',()=>setHolding(!holding));
+  choices.addEventListener('click',e=>{
+    const b=e.target.closest('[data-choice]');
+    if(!b||done)return;
+    choose(b.dataset.choice);
   });
 
-  function clickAt(t,hi){
-    const o=ac.createOscillator(),g=ac.createGain();
-    o.type='sine';o.frequency.value=hi?1200:760;
-    g.gain.setValueAtTime(.11,t);
-    g.gain.exponentialRampToValueAtTime(.001,t+.09);
+  function ding(){
+    flash.classList.add('on');
+    setTimeout(()=>flash.classList.remove('on'),220);
+    if(!ac){
+      try{ac=new (window.AudioContext||window.webkitAudioContext)();}
+      catch{return;}
+    }
+    const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();
+    o.type='triangle';o.frequency.value=988;
+    g.gain.setValueAtTime(.1,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+.18);
     o.connect(g).connect(ac.destination);
-    o.start(t);o.stop(t+.1);
+    o.start(t);o.stop(t+.2);
   }
-  function begin(){
-    try{ac=new (window.AudioContext||window.webkitAudioContext)();}
-    catch(e){feed.textContent='此设备不支持音频，凭光圈跟拍也可以！';}
-    running=true;done=false;hits=0;judged=new Array(TOTAL).fill(null);pending=[];lastBeatShown=-1;
-    hitEl.textContent='0';feed.textContent='';
-    btn.textContent='👏 拍！';
-    startT=(ac?ac.currentTime:performance.now()/1000)+1;
-    if(ac){for(let i=0;i<COUNT_IN+TOTAL;i++)clickAt(startT+i*BEAT,i%4===0);}
-    cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
+  function say(k,text){
+    if(lastMsg===k)return;
+    lastMsg=k;feed.textContent=text;
   }
-  function now(){return ac?ac.currentTime:performance.now()/1000;}
-  function loop(){
-    const t=now();
-    const beatF=(t-startT)/BEAT;
-    const bi=Math.floor(beatF);
-    // 视觉：光圈每拍收拢
-    if(bi>=0){
-      const phase=beatF-bi;                       // 0→1
-      pulse.style.transform='scale('+(1.7-phase*.7)+')';
-      pulse.style.opacity=(phase*.9).toFixed(2);
-      if(bi!==lastBeatShown){
-        lastBeatShown=bi;
-        dancers.classList.add('bop');
-        setTimeout(()=>dancers.classList.remove('bop'),110);
-        if(bi<COUNT_IN)word.textContent=['预备','3','2','1'][bi];
-        else if(bi<COUNT_IN+TOTAL)word.textContent=(bi-COUNT_IN+1);
-        else word.textContent='🎉';
-      }
-    }
-    // 判定：处理已“落地”的延迟拍
-    if(!done){
-      pending=pending.filter(eff=>{
-        if(eff>t)return true;
-        const k=Math.round((eff-startT)/BEAT)-COUNT_IN;
-        if(k>=0&&k<TOTAL&&judged[k]===null&&Math.abs(eff-(startT+(COUNT_IN+k)*BEAT))<=WIN){
-          judged[k]='hit';hits++;hitEl.textContent=hits;
-          feed.textContent='✅ 踩上了！';
-        }else{
-          feed.textContent='💨 慢了半拍……';
-        }
-        return false;
-      });
-      // 结束判定
-      if(t>startT+(COUNT_IN+TOTAL)*BEAT+WIN+LAG){
-        done=true;running=false;btn.textContent='🎵 开始跟跳';
-        const ok=hits>=10;
-        setTimeout(()=>{
-          if(ok){
-            showResult({gameId:'g13',success:true,
-              title:'跟上了！踩中 '+hits+' / 16 拍',
-              body:'发现秘诀了吗？——想踩上点，就得<b>在心里提前 0.35 秒出手</b>。老人跳舞看着慢半拍，其实是大脑一直在悄悄做“提前量”。',
-              voice:'“姐妹们等等我……不是我不想快，是这身子，收到信儿晚。”',
-              data:'<b>真实数据</b> · 人的简单反应时从约 20 岁起逐年变慢，70 岁人群平均比年轻人慢 25%–40%。这不是“迟钝”，是神经传导速度的自然衰减——却常被误读成“笨”。'});
-          }else{
-            showResult({gameId:'g13',success:false,
-              title:'只踩中 '+hits+' / 16 拍',
-              body:'每次你都是听到拍子才出手——可你的身体比意识慢 0.35 秒，落下去时，拍子已经走了。<br><b>试试提前一点点按下去</b>，像她们一样，用预判弥补迟缓。',
-              voice:'“又乱了……我明明是跟着点子拍的呀。”',
-              data:'<b>真实数据</b> · 反应延迟叠加肌肉启动变慢，是老人躲避碰撞、急刹、接扶失败的核心原因——也是“扶不住摔倒的自己”背后的生理学。'});
-          }
-        },400);
-      }
-    }
-    raf=requestAnimationFrame(loop);
+  function setHolding(v){
+    if(done&&v)return;
+    holding=v;
+    holdBtn.classList.toggle('holding',v);
   }
-  return {
-    start(){
-      running=false;done=false;pending=[];
-      word.textContent='—';feed.textContent='';hitEl.textContent='0';
-      btn.textContent='🎵 开始跟跳';
-      pulse.style.opacity='0';
-      cancelAnimationFrame(raf);
-    },
-    stop(){
-      cancelAnimationFrame(raf);raf=null;running=false;
-      if(ac){try{ac.close();}catch(e){}ac=null;}
-    }
-  };
-})();
-
-/* ================= 关卡：爬五楼（交替输入+心率管理） ================= */
-const g14=(function(){
-  const STEPS=12;
-  const LINES={2:'二楼，李老师家飘出饭菜香。',3:'三楼，电视的声音隔着门传出来。',4:'四楼了。扶着栏杆，歇口气也不丢人。'};
-  const floorEl=document.getElementById('floorN');
-  const stepBar=document.getElementById('stepBar');
-  const heartBar=document.getElementById('heartBar');
-  const heartN=document.getElementById('heartN');
-  const heartIcon=document.getElementById('heartIcon');
-  const msg=document.getElementById('stairMsg');
-  const stage=document.getElementById('stairStage');
-  const bL=document.getElementById('footL'),bR=document.getElementById('footR');
-  let floor=1,step=0,bpm=70,lastFoot=null,done=false,resting=false,knee=false;
-  let raf=null,last=0,t0=0,rests=0;
-
-  function setBtns(){
-    const dis=done||resting||knee;
-    bL.disabled=dis;bR.disabled=dis;
+  function options(){
+    const pool=['湾仔街市','湾仔消防局','修顿球场'];
+    choices.innerHTML=pool.map(o=>'<button data-choice="'+o+'">'+o+'</button>').join('');
   }
-  function tap(f){
-    if(done||resting||knee)return;
-    if(f===lastFoot){
-      msg.textContent='⚠ 同一只脚连迈两次，趔趄了一下！';
-      step=Math.max(0,step-1);
-      stage.classList.add('shake');
-      setTimeout(()=>stage.classList.remove('shake'),400);
+  function current(){return STOPS[Math.min(stopIndex,STOPS.length-1)];}
+  function render(){
+    const s=current();
+    board.textContent=s.heard;
+    progressEl.style.width=Math.max(0,Math.min(100,(STOP_DISTANCE-distance)/STOP_DISTANCE*100))+'%';
+    balanceBar.style.width=Math.max(0,balance)+'%';
+    grandma.style.left=(50+position*.38)+'%';
+    bellBtn.disabled=done||!identified||prepared;
+    replayBtn.disabled=done||prepared;
+    moveBtn.disabled=done||!prepared;
+    holdBtn.disabled=done||!prepared;
+    holdBtn.textContent=holding?'✋ 已扶住':'✋ 扶住';
+    choices.style.display=prepared?'none':'grid';
+  }
+  function choose(name){
+    const s=current();
+    if(name===s.name&&s.target){
+      identified=true;
+      feed.textContent='你听出来了：下一站是湾仔街市。现在要按钟，再慢慢行到门口。';
+    }else if(s.target){
+      balance=Math.max(0,balance-8);
+      feed.textContent='站名听错了。再听一次会少一点时间。';
+    }else if(name==='湾仔街市'){
+      balance=Math.max(0,balance-10);
+      feed.textContent='还未到湾仔街市，太早准备会站得更久。';
     }else{
-      lastFoot=f;
-      step++;bpm+=7;
-      if(Math.random()<0.06){
-        knee=true;setBtns();
-        msg.textContent='😖 膝盖突然一软！赶紧扶住栏杆……';
-        setTimeout(()=>{knee=false;setBtns();msg.textContent='缓过来了，慢慢走。';},1800);
-      }
-      if(step>=STEPS){
-        floor++;step=0;lastFoot=null;
-        if(floor>=5){win();}
-        else msg.textContent=LINES[floor]||'';
-      }
+      feed.textContent='不是目标站，继续坐。';
     }
     render();
   }
-  bL.addEventListener('click',()=>tap('L'));
-  bR.addEventListener('click',()=>tap('R'));
-
-  function render(){
-    floorEl.textContent=floor;
-    stepBar.style.width=(step/STEPS*100)+'%';
+  function replay(){
+    if(done||prepared)return;
+    distance=Math.max(0,distance-22);
+    feed.textContent='你请自己再听一次，但车还在向前行。';
+    render();
   }
-  function win(){
-    done=true;setBtns();
-    const sec=Math.round((performance.now()-t0)/1000);
-    msg.textContent='🏠 到家了。';
+  function ring(){
+    if(done||!identified||prepared)return;
+    ding();prepared=true;
+    const ringDistance=distance;
+    if(ringDistance>95)balance=Math.max(0,balance-8);
+    if(ringDistance<35)balance=Math.max(0,balance-15);
+    distance=Math.max(distance,110);
+    feed.textContent=ringDistance>=55&&ringDistance<=90?'叮——时间刚好。扶住栏杆，慢慢到车门。':'叮——有点早/迟，但还来得及，扶住栏杆慢慢行。';
+    render();
+  }
+  function move(){
+    if(done||!prepared)return;
+    if(!holding){
+      balance=Math.max(0,balance-18);
+      feed.textContent='没有扶住就起身，车一晃，身体差点失衡。';
+    }else if(blocked>0){
+      blocked=0;
+      balance=Math.max(0,balance-6);
+      position=Math.min(100,position+20);
+      feed.textContent='你让了半步，再扶住栏杆向门口挪过去。';
+    }else{
+      position=Math.min(100,position+30);
+      feed.textContent='扶住栏杆，向车门行一步。';
+    }
+    if(current().target&&prepared&&position>=90){success();return;}
+    render();
+  }
+  function nextStop(){
+    stopIndex++;
+    distance=STOP_DISTANCE;identified=false;prepared=false;position=0;holding=false;lastMsg='';
+    holdBtn.classList.remove('holding');
+    if(stopIndex>=STOPS.length){fail('miss');return;}
+    feed.textContent='广播又响起，但有些字听不清。';
+    render();
+  }
+  function success(){
+    done=true;render();
     setTimeout(()=>{
-      showResult({gameId:'g14',success:true,
-        title:'五楼，'+sec+' 秒'+(rests?'，喘了 '+rests+' 次':''),
-        body:'四十八级台阶。你必须管着自己的心跳，让着自己的膝盖，还要防着自己的脚绊自己。年轻人一分钟跑完的楼梯，是她每天出门要过两遍的关。',
-        voice:'“不买那么多菜了……拎不动，也是因为，还得留力气爬楼。”',
-        data:'<b>真实数据</b> · 我国 2000 年前建成的多层住宅大多没有电梯，数千万老人住在其中。“悬空老人”一词由此而来——不是不想下楼，是下了楼，就怕上不来。老旧小区加装电梯，正是为了他们。'});
-    },700);
+      showResult({gameId:'g13',success:true,
+        title:'你落到车了',
+        body:'你不是到站才站起来，而是在听到站名前就开始准备：辨认站名、按钟、扶住栏杆、避开乘客，再慢慢走到车门。',
+        voice:'“我早啲企出去，不是心急，是怕行唔切。”',
+        data:'<b>本地化体验</b> · 很多长者不是故意早早站在车门口。他们只是在替自己争取那几十秒，避免车到站时来不及移动。'});
+    },600);
+  }
+  function fail(kind){
+    if(done)return;
+    done=true;render();
+    const body=kind==='balance'
+      ?'车身一晃，你差点跌倒，被旁边乘客扶住。这一站，只能先不下车。'
+      : kind==='door'
+        ?'你已经按钟，但还未走到门口。车门关上了。'
+        :'你没有及时认出湾仔街市，车继续往下一站驶去。';
+    setTimeout(()=>{
+      showResult({gameId:'g13',success:false,
+        title:kind==='balance'?'差点跌倒':kind==='door'?'未行到车门':'坐过站了',
+        body:body+'<br><b>提示：听到目标站后先按钟，再扶住栏杆一步一步行到车门。</b>',
+        voice:'“我听到好似係湾仔，但一犹豫，车就过了。”',
+        data:'<b>体验提示</b> · 听不清站名、车身晃动、要提前移动，是长者搭车时同时面对的几件事。'});
+    },500);
   }
   function loop(ts){
     if(!last)last=ts;
     const dt=Math.min((ts-last)/1000,.1);last=ts;
     if(!done){
-      bpm=Math.max(70,bpm-11*dt);
-      if(!resting&&bpm>142){
-        resting=true;rests++;setBtns();
-        msg.textContent='🫀 心口怦怦跳得厉害，必须停下来喘口气……';
+      distance-=dt*(prepared?WALK_SPEED:LISTEN_SPEED);
+      if(prepared&&!holding)balance=Math.max(0,balance-dt*5);
+      if(blocked>0)blocked-=dt;
+      if(Math.random()<dt*.08&&prepared){
+        blocked=1.1;
+        feed.textContent='有乘客经过，先让一让。';
       }
-      if(resting&&bpm<105){
-        resting=false;setBtns();
-        msg.textContent='呼——缓过来了，继续。';
+      if(Math.random()<dt*.06&&prepared&&!holding){
+        balance=Math.max(0,balance-20);
+        feed.textContent='车突然一顿，幸好旁边有人扶了一下。';
       }
-      heartBar.style.width=Math.min(100,(bpm-60)/100*100)+'%';
-      heartN.textContent=Math.round(bpm);
-      heartIcon.classList.toggle('race',bpm>125);
+      if(balance<=0)fail('balance');
+      else if(distance<=0){
+        if(current().target&&prepared&&position>=90)success();
+        else if(current().target&&prepared)fail('door');
+        else if(current().target)fail('miss');
+        else nextStop();
+      }else if(!prepared){
+        if(current().target)say('target','听起来像“湾___市”。如果是目标站，就要准备。');
+        else say('listen','下一站不是目标站，听清楚再决定。');
+      }
+      render();
     }
     raf=requestAnimationFrame(loop);
   }
   return {
     start(){
-      floor=1;step=0;bpm=70;lastFoot=null;done=false;resting=false;knee=false;rests=0;last=0;
-      t0=performance.now();
-      msg.textContent='深吸一口气，出发。';
-      render();setBtns();
-      cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
+      stopIndex=0;distance=STOP_DISTANCE;position=0;balance=100;prepared=false;identified=false;holding=false;blocked=0;done=false;last=0;lastMsg='';
+      options();feed.textContent='你坐在下层靠窗位置。今日要去湾仔街市。';bellBtn.classList.remove('pressed');
+      render();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
     },
-    stop(){cancelAnimationFrame(raf);raf=null;last=0;}
+    stop(){
+      cancelAnimationFrame(raf);raf=null;last=0;setHolding(false);
+      if(ac){try{ac.close();}catch{}ac=null;}
+    }
+  };
+})();
+
+/* ================= 关卡：港铁扶梯平衡（三阶段） ================= */
+const g14=(function(){
+  const stage=document.getElementById('mtrEscStage');
+  const rider=document.getElementById('elderRider');
+  const cue=document.getElementById('escStepCue');
+  const phaseLabel=document.getElementById('escPhaseLabel');
+  const balanceBall=document.getElementById('escBalanceBall');
+  const stabilityBar=document.getElementById('escStabilityBar');
+  const stabilityN=document.getElementById('escStabilityN');
+  const pressureN=document.getElementById('escPressureN');
+  const exitBar=document.getElementById('mtrExitBar');
+  const msg=document.getElementById('mtrMsg');
+  const leftBtn=document.getElementById('escLeftBtn');
+  const rightBtn=document.getElementById('escRightBtn');
+  const stepBtn=document.getElementById('escStepBtn');
+  let phase='mount',progress=0,balance=0,stability=100,pressure=0,input=0,done=false;
+  let raf=null,last=0,t0=0,phaseT=0,events=0,stepMiss=0,lastEvent=0,exitPressed=false;
+
+  bindHold(leftBtn,()=>{input=-1;},()=>{if(input<0)input=0;});
+  bindHold(rightBtn,()=>{input=1;},()=>{if(input>0)input=0;});
+  stepBtn.addEventListener('click',step);
+
+  function setPhase(next,text){
+    phase=next;phaseT=0;msg.textContent=text;
+    if(next==='mount')phaseLabel.textContent='阶段 A · 踏上扶梯';
+    if(next==='ride')phaseLabel.textContent='阶段 B · 保持平衡';
+    if(next==='exit')phaseLabel.textContent='阶段 C · 踏出扶梯';
+  }
+  function damage(n,text){
+    stability=Math.max(0,stability-n);
+    if(text)msg.textContent=text;
+    stage.classList.add('shake');
+    setTimeout(()=>stage.classList.remove('shake'),340);
+    if(stability<=0)fail('balance');
+  }
+  function addPressure(n){
+    pressure=Math.min(100,pressure+n);
+  }
+  function step(){
+    if(done)return;
+    if(phase==='mount'){
+      const pos=(phaseT*1.15)%1;
+      const d=Math.abs(pos-.5);
+      if(d<.11){
+        setPhase('ride','踏上去了。现在保持平衡，不要让光球滑出安全区。');
+      }else if(d<.22){
+        stepMiss++;damage(pos<.5?10:15,pos<.5?'稍早了一点，脚步不稳。':'慢了半拍，被级边带了一下。');
+        setPhase('ride','已经踏上扶梯。先稳住身体。');
+      }else{
+        stepMiss++;addPressure(15);damage(30,'脚步乱了，只能扶住旁边栏杆。');
+        setPhase('ride','扶稳，后面人流已经贴近。');
+      }
+    }else if(phase==='exit'){
+      const remain=3-phaseT;
+      exitPressed=true;
+      if(remain>=.2&&remain<=.8)win('完美踏出');
+      else if(remain>-0.25&&remain<1.2){damage(5,'成功踏出，但脚尖拖了一下。');win('踏出去了');}
+      else{damage(25,'踏出时机不对，差点在出口绊倒。');if(stability>0)win('扶住出口栏杆');}
+    }
+  }
+  function render(){
+    stabilityBar.style.width=Math.max(0,stability)+'%';
+    stabilityN.textContent=Math.round(stability);
+    pressureN.textContent=Math.round(pressure);
+    exitBar.style.width=Math.max(0,Math.min(100,progress))+'%';
+    balanceBall.style.left=(50+balance*.42)+'%';
+    rider.style.left=(50+balance*.2)+'%';
+    rider.style.top=(phase==='mount'?'76%':phase==='ride'?(76-progress*.42)+'%':'28%');
+    if(phase==='mount'){
+      cue.style.display='block';
+      cue.style.left=(12+((phaseT*1.15)%1)*76)+'%';
+    }else{
+      cue.style.display='none';
+    }
+    stepBtn.textContent=phase==='exit'?'🦶 踏出':'🦶 踏步';
+  }
+  function win(title){
+    if(done)return;
+    done=true;render();
+    const sec=Math.round((performance.now()-t0)/1000);
+    setTimeout(()=>{
+      showResult({gameId:'g14',success:true,
+        title:title+'，用了 '+sec+' 秒',
+        body:'这段扶梯只用了几十秒，但你刚才同时做了三件事：看级边、稳住身体、避开身后人流。对年轻人来说，扶梯是代步工具；对长者来说，它是一条不停移动的窄桥。',
+        voice:'“唔好急，等我睇准级边先。”',
+        data:'<b>扶梯安全指数</b> · 踏步失误 '+stepMiss+' 次，失衡事件 '+events+' 次，最高压力 '+Math.round(pressure)+'%。'});
+    },650);
+  }
+  function fail(kind){
+    if(done)return;
+    done=true;render();
+    setTimeout(()=>{
+      showResult({gameId:'g14',success:false,
+        title:kind==='exit'?'差点绊在出口':'扶梯上失去平衡',
+        body:'你没有真正跌倒，但身体已经吓到僵住。后面的人只是绕过你继续走，你站在一旁扶着栏杆，等心跳慢下来。',
+        voice:'“我知道要行，但脚一踏错，成个人就慌。”',
+        data:'<b>体验提示</b> · 踏上、站稳、踏出，是长者搭扶梯时连续发生的三个难点。'});
+    },520);
+  }
+  function event(t){
+    if(t-lastEvent<2.2)return;
+    lastEvent=t;events++;
+    const r=Math.random();
+    if(r<.34){balance+=24;addPressure(20);msg.textContent='后面有人快步靠近：“唔该借借。”';}
+    else if(r<.67){balance+=(Math.random()<.5?-1:1)*28;msg.textContent='旁边乘客碰到手臂，身体偏了一下。';}
+    else{balance+=18;msg.textContent='扶手速度错觉，身体慢慢向一侧漂。';}
+  }
+  function loop(ts){
+    if(!last)last=ts;
+    const dt=Math.min((ts-last)/1000,.1);last=ts;phaseT+=dt;
+    if(!done){
+      if(phase==='mount'){
+        msg.textContent=phaseT<.4?'睇准级边，慢慢踏上去。':msg.textContent;
+      }else if(phase==='ride'){
+        progress+=dt*13;
+        balance+=Math.sin(ts/520)*dt*35+(Math.random()-.5)*dt*16-input*dt*68;
+        balance=Math.max(-100,Math.min(100,balance));
+        pressure=Math.min(100,Math.max(0,pressure+dt*1.4));
+        if(Math.random()<dt*.22)event(ts/1000);
+        if(Math.abs(balance)>70)stability=Math.max(0,stability-dt*18);
+        if(Math.abs(balance)>90)stability=Math.max(0,stability-dt*38);
+        if(stability<=0)fail('balance');
+        if(progress>=78)setPhase('exit','出口到了。不要等到“踏出”才按，要提前一点。');
+      }else if(phase==='exit'){
+        progress=Math.min(100,82+phaseT*6);
+        const remain=3-phaseT;
+        msg.textContent=remain>2?'3':remain>1?'2':remain>0?'1':'踏出！';
+        if(remain<-0.35&&!exitPressed)fail('exit');
+      }
+      render();
+    }
+    raf=requestAnimationFrame(loop);
+  }
+  return {
+    start(){
+      progress=0;balance=0;stability=100;pressure=0;input=0;done=false;last=0;events=0;stepMiss=0;lastEvent=0;exitPressed=false;t0=performance.now();
+      setPhase('mount','睇准级边，慢慢踏上去。');
+      render();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
+    },
+    stop(){cancelAnimationFrame(raf);raf=null;last=0;input=0;}
   };
 })();
 
