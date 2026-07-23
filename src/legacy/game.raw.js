@@ -301,7 +301,7 @@ const g3=(function(){
         osc.connect(g).connect(ac.destination);osc.start();
         nodes={osc,g};
         this.textContent='🔕 摘下耳朵（关闭耳鸣）';
-      }catch(err){this.textContent='当前设备不支持音频';}
+      }catch{this.textContent='当前设备不支持音频';}
     }else{
       const on=nodes.g.gain.value>0;
       nodes.g.gain.value=on?0:0.012;
@@ -455,7 +455,7 @@ const g4=(function(){
       o.type='square';o.frequency.value=310;g.gain.value=.06;
       o.connect(g).connect(ac.destination);o.start();
       setTimeout(()=>{o.stop();ac.close();},450);
-    }catch(e){}
+    }catch{}
   }
   return {
     start(){
@@ -790,7 +790,7 @@ const g6=(function(){
 const g5=(function(){
   const scr=document.getElementById('phoneScreen');
   const missEl=document.getElementById('missN');
-  let ring=40,raf=null,last=0,done=false,miss=0,popLeft=0;
+  let ring=40,raf=null,last=0,done=false,miss=0;
 
   function addMiss(){miss++;missEl.textContent=miss;}
   function rndPos(el){
@@ -810,7 +810,6 @@ const g5=(function(){
     spawnPopup(0);
   }
   function spawnPopup(idx){
-    popLeft=1;
     const p=document.createElement('div');
     p.className='popup';rndPos(p);
     let fakeX=false;
@@ -859,7 +858,7 @@ const g5=(function(){
     scr.appendChild(ad);
   }
   function closePopup(p,idx){
-    p.remove();popLeft=0;
+    p.remove();
     if(idx<2)spawnPopup(idx+1);
   }
   function win(){
@@ -1619,3 +1618,8 @@ const g14=(function(){
 
 /* ================= 关卡注册表 ================= */
 const GAMES={g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14};
+
+window.show=show;
+window.openGame=openGame;
+window.goHome=goHome;
+window.restartAll=restartAll;
