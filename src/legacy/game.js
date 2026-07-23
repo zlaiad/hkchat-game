@@ -6,15 +6,7 @@ export function initLegacyGame() {
   if (initialized) return;
   initialized = true;
 
-  const bootstrap = new Function(
-    `${rawScript}
-window.show = show;
-window.openGame = openGame;
-window.goHome = goHome;
-window.restartAll = restartAll;
-`
-  );
+  const bootstrap = new Function(rawScript);
 
   bootstrap();
 }
-

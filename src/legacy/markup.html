@@ -44,18 +44,18 @@
         <span class="done">✓</span>
       </div>
       <div class="card" id="card-g6" onclick="openGame('g6')">
-        <span class="num">下午</span><span class="icon">🏥</span>
-        <div><h3>自助挂号机</h3><p>反光屏幕 · 三十秒不动就退出重来</p></div>
+        <span class="num">下午</span><span class="icon">💳</span>
+        <div><h3>八达通余额不足</h3><p>数码压力 · 嘟嘟之后没人等你</p></div>
         <span class="done">✓</span>
       </div>
       <div class="card" id="card-g14" onclick="openGame('g14')">
-        <span class="num">下午</span><span class="icon">🪜</span>
-        <div><h3>爬回五楼的家</h3><p>双脚交替 · 没有电梯，心率是计时器</p></div>
+        <span class="num">下午</span><span class="icon">🚇</span>
+        <div><h3>港铁扶梯平衡</h3><p>踏步时机 · 移动中的窄桥</p></div>
         <span class="done">✓</span>
       </div>
       <div class="card" id="card-g13" onclick="openGame('g13')">
-        <span class="num">傍晚</span><span class="icon">💃</span>
-        <div><h3>跟上广场舞</h3><p>节奏游戏 · 你的反应，慢了 0.35 秒</p></div>
+        <span class="num">傍晚</span><span class="icon">🚋</span>
+        <div><h3>下一站，听不清</h3><p>听站名 · 按钟后慢慢到车门</p></div>
         <span class="done">✓</span>
       </div>
       <div class="card" id="card-g5" onclick="openGame('g5')">
@@ -199,17 +199,22 @@
     <div id="memoStage"></div>
   </section>
 
-  <!-- ============ 关卡：自助挂号机 ============ -->
+  <!-- ============ 关卡：八达通余额不足 ============ -->
   <section id="g6" class="screen">
-    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 自助挂号机</h2></div>
-    <div class="brief">医院大厅，人工窗口排着长队，护士指了指自助机。屏幕反光刺眼，<b>30 秒不操作就会自动退出重来</b>。任务：挂一个<b>心血管内科</b>的复查号。可以按住"用手挡光"看清屏幕。</div>
-    <div class="kiosk" id="kiosk">
-      <div class="kiosk-timer"><i id="kioskTimeBar"></i></div>
-      <div class="kiosk-screen" id="kioskScreen"></div>
-      <div class="glare2"></div>
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 嘟嘟——余额不足</h2></div>
+    <div class="brief">港铁闸机前，八达通忽然响起红色提示。你要先离开闸机，找到增值机，完成增值，再回来过闸。压力越高，画面越晃，字越难看清。</div>
+    <div id="octopusStage">
+      <div class="oct-status">
+        <span>压力 <b id="octPressureN">0</b>%</span>
+        <div class="stamina"><i id="octPressureBar" style="width:0%;background:linear-gradient(90deg,var(--ok),var(--alert));"></i></div>
+        <span>倒计时 <b id="octTimeN">30</b>s</span>
+      </div>
+      <div id="octopusScene"></div>
+      <div id="octopusMsg">先拍八达通入闸。</div>
+      <div id="octopusControls"></div>
     </div>
     <div class="center" style="margin-top:14px;">
-      <button class="btn ghost" id="shadeBtn">✋ 按住 · 用手挡住反光</button>
+      <button class="btn ghost" id="octShadeBtn">👁 按住 · 眯眼睇清楚</button>
     </div>
   </section>
 
@@ -284,36 +289,64 @@
     </div>
   </section>
 
-  <!-- ============ 关卡：广场舞节奏 ============ -->
+  <!-- ============ 关卡：叮叮车落车 ============ -->
   <section id="g13" class="screen">
-    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">傍晚 · 跟上广场舞</h2></div>
-    <div class="brief">老姐妹们喊你跳一段。规则很简单：<b>光圈收拢到中心的瞬间拍下大按钮</b>。但有个残酷的设定——你的动作会比你的意识<b>慢 0.35 秒</b>才做出来。想踩上拍子？你得学会提前出手。16 拍里踩中 10 拍就算跟上了。</div>
-    <div id="danceStage">
-      <div class="dancers" id="dancers">💃 🕺 💃 🕺</div>
-      <div id="beatRing"><div id="beatPulse"></div><div id="beatWord">—</div></div>
-      <div id="handLag">👏</div>
-      <div id="danceFeed"></div>
-      <div class="dance-stats">踩中 <b id="hitN">0</b> / 16 拍</div>
-      <button class="btn" id="tapBeatBtn">🎵 开始跟跳</button>
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">傍晚 · 下一站，听不清</h2></div>
+    <div class="brief">陈奶奶坐叮叮车去<b>湾仔街市</b>。站名广播听不清，车一直在走。你要认出目标站，提前按钟，然后扶住栏杆慢慢走到车门。</div>
+    <div id="tramStage">
+      <div class="tram-top">
+        <span>🚋 Ding Ding</span>
+        <small>目标站：湾仔街市</small>
+      </div>
+      <div id="tramWindow">
+        <div class="tram-window-view"></div>
+        <div class="tram-seat seat-back"></div>
+        <div id="stationBoard">下一站：修___场</div>
+        <div id="tramGrandma">🧓</div>
+        <div class="tram-door">门</div>
+        <div class="tram-seat seat-front"></div>
+        <div id="bellFlash">叮</div>
+      </div>
+      <div class="tram-route">
+        <span>金钟道</span><span>修顿球场</span><span class="target">湾仔街市</span><span>天乐里</span>
+      </div>
+      <div class="stamina" style="margin:8px 0;"><i id="tramProgress" style="width:0%;background:linear-gradient(90deg,var(--mtr),var(--tram));"></i></div>
+      <div class="stamina" style="margin:8px 0;"><i id="tramBalanceBar" style="width:100%;background:linear-gradient(90deg,var(--alert),var(--ok));"></i></div>
+      <div id="tramFeed">听清楚下一站，再决定要不要按钟。</div>
+      <div id="tramChoices" class="tram-choices"></div>
+      <div class="hold-row">
+        <button class="holdbtn" id="tramReplayBtn">👂 再听一次</button>
+        <button class="holdbtn" id="bellBtn">🔔 按钟</button>
+        <button class="holdbtn" id="tramHoldBtn">✋ 扶住</button>
+        <button class="holdbtn" id="tramMoveBtn">→ 到车门</button>
+      </div>
     </div>
   </section>
 
-  <!-- ============ 关卡：爬五楼 ============ -->
+  <!-- ============ 关卡：港铁扶梯平衡 ============ -->
   <section id="g14" class="screen">
-    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 爬回五楼的家</h2></div>
-    <div class="brief">从医院回来，老楼没有电梯。<b>左右脚交替点击</b>往上爬——同一只脚连迈两次会趔趄退一步；爬快了心率飙升，超过红线就必须停下喘气；膝盖还会时不时突然一软。家在五楼。</div>
-    <div id="stairStage">
-      <div id="floorBig"><span id="floorN">1</span><small> / 5 楼</small></div>
-      <div class="stamina" style="margin:6px 0;"><i id="stepBar" style="width:0%;background:linear-gradient(90deg,var(--amber-deep),var(--amber));"></i></div>
-      <div id="stairMsg">深吸一口气，出发。</div>
-      <div class="heart-row">
-        <span class="hicon" id="heartIcon">🫀</span>
-        <div class="stamina" style="flex:1;"><i id="heartBar" style="width:20%;background:linear-gradient(90deg,var(--ok),var(--alert));"></i></div>
-        <span style="font-size:13px;color:var(--paper-dim);"><b id="heartN">70</b> 次/分</span>
+    <div class="gamebar"><button class="back" onclick="goHome()">← 回家</button><h2 class="serif">下午 · 落月台，唔好急</h2></div>
+    <div class="brief">港铁扶梯对长者来说，是一条移动中的窄桥。你要睇准级边踏上去，中段保持平衡，到出口时再踏出。操作：左/右稳住身体，中间按钮踏步。</div>
+    <div id="mtrEscStage">
+      <div class="mtr-sign"><span>MTR 港铁</span><small id="escPhaseLabel">阶段 A · 踏上扶梯</small></div>
+      <div id="mtrEscalator">
+        <div class="esc-safe-line"></div>
+        <div id="escStepCue"></div>
+        <div class="balance-track esc-track"><span></span><i id="escBalanceBall"></i></div>
+        <div id="queuePeople"><span>🧍</span><span>🧍</span><span>🧍</span><span>🧍</span></div>
+        <div id="elderRider">🧓</div>
       </div>
+      <div class="esc-stats">
+        <span>稳定 <b id="escStabilityN">100</b></span>
+        <div class="stamina"><i id="escStabilityBar" style="width:100%;background:linear-gradient(90deg,var(--alert),var(--ok));"></i></div>
+        <span>压力 <b id="escPressureN">0</b></span>
+      </div>
+      <div class="stamina" style="margin:6px 0;"><i id="mtrExitBar" style="width:0%;background:linear-gradient(90deg,var(--mtr),var(--tram));"></i></div>
+      <div id="mtrMsg">睇准级边，慢慢踏上去。</div>
       <div class="foot-row">
-        <button class="footbtn" id="footL">🦶 左脚</button>
-        <button class="footbtn" id="footR">右脚 🦶</button>
+        <button class="footbtn" id="escLeftBtn">← 左边稳住</button>
+        <button class="footbtn" id="escStepBtn">🦶 踏步</button>
+        <button class="footbtn" id="escRightBtn">右边稳住 →</button>
       </div>
     </div>
   </section>
@@ -327,7 +360,7 @@
     <div class="final-list">
       <div>把父母手机的字体和音量调到最大，关掉广告弹窗多的 App</div>
       <div>把家里常用药按星期分装进一周药盒</div>
-      <div>给楼梯、卫生间装上扶手和夜灯，收起地上的电线</div>
+      <div>带他们熟悉常去车站的升降机位置，出行时预留慢一点的换乘时间</div>
       <div>陪他们去做一次视力和听力检查——白内障手术只需十分钟</div>
       <div>教一遍视频通话，然后写在纸上，贴在电话旁</div>
       <div>下次他们让你重复第三遍时，请用第一遍的语气</div>
